@@ -122,9 +122,8 @@ All evaluations are conducted using the [`vlmevalkit`](https://github.com/open-c
 
 ### 1. Visual Understanding
 
-| Model | Size |  | VSP | VisPuzzle | ChartQA | VStar🌟 | BLINK-J🌟 | MMVP🌟 | SAT🌟 | BLINK🌟 | CV-Bench🌟 |
+| Model | Size |  | VSP | VisPuzzle | ChartQA | VStar | BLINK-J | MMVP | SAT | BLINK | CV-Bench |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| | | | | | | | | | | | |
 | Visual Understanding-only VLM | | | | | | | | | | | |
 | GPT-4o | – |  | 33.50 | 43.75 | 76.34 | 61.78 | 72.67 | 84.67 | 28.00 | 60.28 | 75.61 |
 | GPT-5 | – |  | 57.33 | 78.00 | 80.85 | 71.73 | 77.33 | 86.33 | 73.30 | 69.86 | 85.46 |
@@ -133,7 +132,6 @@ All evaluations are conducted using the [`vlmevalkit`](https://github.com/open-c
 |  | 38B |  | 20.16 | 36.50 | 80.44 | 76.96 | 80.67 | 80.33 | 49.33 | 62.65 | 85.96 |
 | Qwen2.5-VL | 7B |  | 2.16 | 34.75 | 78.12 | 76.44 | 59.33 | 77.33 | 51.33 | 55.92 | 75.20 |
 |  | 72B |  | 41.83 | 40.00 | 82.03 | 85.86 | 61.33 | 82.00 | 64.67 | 61.91 | 82.54 |
-| | | | | | | | | | | | |
 | Unified Models | | | | | | | | | | | |
 | Janus-pro | 7B |  | 0.00 | 33.50 | 43.08 | 38.22 | 50.67 | 63.33 | 22.00 | 38.51 | 67.83 |
 | Chameleon | 7B |  | 0.83 | 30.50 | 5.74 | 28.27 | 0.67 | 47.67 | 10.67 | 16.52 | 36.52 |
