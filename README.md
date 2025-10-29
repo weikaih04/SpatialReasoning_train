@@ -5,8 +5,6 @@
 
 ## Emergent Properties in Multimodal Interleaved Chain-of-Thought Reasoning
 
-🌟  This is the official repository for the paper "[ThinkMorph: Emergent Properties in Multimodal Interleaved Chain-of-Thought Reasoning]()", which contains the training and inference code for ThinkMorph.
-
 <p align="center">
   <a href="">
     <img
@@ -39,6 +37,8 @@
     />
   </a> -->
 </p>
+
+🌟  This is the official repository for the paper "[ThinkMorph: Emergent Properties in Multimodal Interleaved Chain-of-Thought Reasoning]()", which contains the training and inference code for ThinkMorph.
 
 ## 💥 News 
 - **[2025.10.29]** Our model checkpoint and training data are now accessible at [Huggingface](https://huggingface.co/ThinkMorph).
@@ -79,7 +79,7 @@ pip install -r requirements.txt
 2️⃣  Download checkpoint
 ```bash
 pip install -U "huggingface_hub[cli]"
-hf download ThinkMorph/ThinkMorph
+hf download ThinkMorph/ThinkMorph-7B
 ```
 
 3️⃣ Use `inference.ipynb` to play with ThinkMorph!
