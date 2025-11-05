@@ -30,12 +30,12 @@
         alt="ThinkMorph Dataset"
     />
   </a>
-  <!-- <a href="https://demo.bagel-ai.org/">
+  <a href="https://x.com/Kuvvius/status/1985388865595851135">
     <img
-      src="https://img.shields.io/badge/BAGEL-Demo-blue?logo=googleplay&logoColor=blue"
+      src="https://img.shields.io/badge/ThinkMorph-Twitter-blue?logo=x&logoColor=black"
       alt="BAGEL Demo"
     />
-  </a> -->
+  </a>
 </p>
 
 🌟  This is the official repository for the paper "[ThinkMorph: Emergent Properties in Multimodal Interleaved Chain-of-Thought Reasoning]()", which contains the training and inference code for ThinkMorph.
