@@ -69,8 +69,20 @@ pip install -r requirements.txt
 
 2️⃣  Download checkpoint
 ```bash
-pip install -U "huggingface_hub[cli]"
-hf download ThinkMorph/ThinkMorph-7B
+from huggingface_hub import snapshot_download
+
+save_dir = "models/ThinkMorph-7B"
+repo_id = "ThinkMorph/ThinkMorph-7B"
+cache_dir = save_dir + "/cache"
+
+snapshot_download(cache_dir=cache_dir,
+  local_dir=save_dir,
+  repo_id=repo_id,
+  local_dir_use_symlinks=False,
+  resume_download=True,
+  allow_patterns=["*.json", "*.safetensors", "*.bin", "*.py", "*.md", "*.txt"],
+)
+
 ```
 
 3️⃣ Use `inference.ipynb` to play with ThinkMorph!
