@@ -186,13 +186,10 @@ All evaluations are conducted using the [`VLMEvalKit`](https://github.com/open-c
 ## ✍️ Citation
 
 ```bibtex
-@misc{gu2025thinkmorphemergentpropertiesmultimodal,
-      title={ThinkMorph: Emergent Properties in Multimodal Interleaved Chain-of-Thought Reasoning}, 
-      author={Jiawei Gu and Yunzhuo Hao and Huichen Will Wang and Linjie Li and Michael Qizhe Shieh and Yejin Choi and Ranjay Krishna and Yu Cheng},
-      year={2025},
-      eprint={2510.27492},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2510.27492}, 
+@article{gu2025thinkmorph,
+  title={ThinkMorph: Emergent Properties in Multimodal Interleaved Chain-of-Thought Reasoning},
+  author={Gu, Jiawei and Hao, Yunzhuo and Wang, Huichen Will and Li, Linjie and Shieh, Michael Qizhe and Choi, Yejin and Krishna, Ranjay and Cheng, Yu},
+  journal={arXiv preprint arXiv:2510.27492},
+  year={2025}
 }
 ```
