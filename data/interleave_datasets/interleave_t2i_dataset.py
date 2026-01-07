@@ -1,6 +1,7 @@
 # Copyright 2025 Bytedance Ltd. and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 
+import os
 import pyarrow.parquet as pq
 
 from ..distributed_iterable_dataset import DistributedIterableDataset
@@ -154,8 +155,12 @@ class ParquetStandardIterableDataset(DistributedIterableDataset):
         for data_dir, num_data_path in zip(data_dir_list, num_used_data):
             data_paths = get_parquet_data_paths([data_dir], [num_data_path])
             for data_path in data_paths:
-                if data_path in parquet_info.keys():
-                    num_row_groups = parquet_info[data_path]['num_row_groups']
+                # Try full path first, then just filename for compatibility
+                parquet_key = data_path
+                if data_path not in parquet_info.keys():
+                    parquet_key = os.path.basename(data_path)
+                if parquet_key in parquet_info.keys():
+                    num_row_groups = parquet_info[parquet_key]['num_row_groups']
                     for rg_idx in range(num_row_groups):
                         row_groups.append((data_path, rg_idx))
         return row_groups

@@ -163,12 +163,12 @@ class Bagel(PreTrainedModel):
         else:
             attention_mask = nested_attention_masks
 
-        if self.config.visual_und:
+        if self.config.visual_und and vit_token_seqlens is not None:
             cu_seqlens = torch.nn.functional.pad(torch.cumsum(vit_token_seqlens, dim=0), (1, 0))
             cu_seqlens = cu_seqlens.to(torch.int32)
             max_seqlen = torch.max(vit_token_seqlens).item()
             packed_vit_token_embed = self.vit_model(
-                packed_pixel_values=packed_vit_tokens, 
+                packed_pixel_values=packed_vit_tokens,
                 packed_flattened_position_ids=packed_vit_position_ids,
                 cu_seqlens=cu_seqlens,
                 max_seqlen=max_seqlen,
