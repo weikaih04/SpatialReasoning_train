@@ -1,0 +1,110 @@
+version: v2
+description: Evaluate ThinkMorph checkpoint on AI2Thor Perspective Taking dataset (Full 800 samples)
+budget: ai2/oe-mm
+tasks:
+- name: eval-perspective-taking
+  replicas: 1
+  image:
+    docker: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+  envVars:
+    - name: WEIKAI_UW_WANDB_KEY
+      secret: WEIKAI_UW_WANDB_KEY
+  command: ['bash', '-c']
+  arguments:
+  - |
+    # ============================================================================
+    # Configuration - MODIFY THIS SECTION FOR EACH NEW CHECKPOINT
+    # ============================================================================
+    export CHECKPOINT_NAME=0003040  # 👈 CHANGE THIS to your checkpoint number
+    # ============================================================================
+    
+    export CHECKPOINT_PATH=ckpt_pet/${CHECKPOINT_NAME}
+    export DATASET_NAME=AI2ThorPerspective_NoArrow
+    export MODEL_NAME=thinkmorph_pet_${CHECKPOINT_NAME}
+    
+    echo "=========================================="
+    echo "Evaluation Configuration"
+    echo "=========================================="
+    echo "Checkpoint: ${CHECKPOINT_PATH}"
+    echo "Dataset: ${DATASET_NAME}"
+    echo "Model Name: ${MODEL_NAME}"
+    echo "=========================================="
+    echo ""
+    
+    # Setup environment
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=America/Los_Angeles
+    
+    echo "Installing system dependencies..."
+    apt-get update && \
+    apt-get install -y libstdc++6 libgl1-mesa-glx libglib2.0-0 g++ git
+    
+    echo "Activating conda environment..."
+    source /weka/oe-training-default/jieyuz2/improve_segments/miniconda3/etc/profile.d/conda.sh
+    conda activate thinkmorph_eval
+    
+    cd /weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training
+    
+    # Prepare checkpoint (copy config files if missing)
+    echo ""
+    echo "Preparing checkpoint for evaluation..."
+    bash scripts/prepare_checkpoint_for_eval.sh ${CHECKPOINT_PATH}
+    
+    if [ $? -ne 0 ]; then
+        echo "❌ Checkpoint preparation failed!"
+        exit 1
+    fi
+    
+    # Navigate to evaluation directory
+    cd VLMEvalKit_Thinkmorph
+    
+    # Run evaluation
+    echo ""
+    echo "=========================================="
+    echo "Starting Evaluation"
+    echo "=========================================="
+    echo "Running full evaluation on ${DATASET_NAME} (800 samples)..."
+    echo ""
+    
+    python run.py \
+      --data ${DATASET_NAME} \
+      --model ${MODEL_NAME} \
+      --mode all \
+      --work-dir outputs_eval \
+      --verbose
+    
+    EVAL_EXIT_CODE=$?
+    
+    echo ""
+    echo "=========================================="
+    if [ $EVAL_EXIT_CODE -eq 0 ]; then
+        echo "✅ Evaluation completed successfully!"
+        echo "=========================================="
+        echo ""
+        echo "Results location:"
+        echo "  outputs_eval/${MODEL_NAME}/"
+        echo ""
+        echo "Visualization outputs:"
+        echo "  ../viz_outputs/pet_${CHECKPOINT_NAME}/"
+    else
+        echo "❌ Evaluation failed with exit code: ${EVAL_EXIT_CODE}"
+        echo "=========================================="
+        exit ${EVAL_EXIT_CODE}
+    fi
+    
+  result:
+    path: /weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/VLMEvalKit_Thinkmorph/outputs_eval
+  datasets:
+    - mountPath: /weka/oe-training-default
+      source:
+        weka: oe-training-default
+  resources:
+    gpuCount: 2
+    sharedMemory: 100GiB
+  context:
+    priority: normal
+    preemptible: true
+  constraints:
+    cluster: [ai2/jupiter, ai2/ceres, ai2/saturn]
+  hostNetworking: true
+
