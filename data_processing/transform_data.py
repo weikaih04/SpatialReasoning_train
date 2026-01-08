@@ -61,30 +61,58 @@ def transform_item(item):
     # 1. <think>{sideview_desc}</think><image_start>
     # 2. <image_end><answer>{answer}</answer>
     
-    # Remove <image_2> from sideview_desc.
-    # Patterns observed: "shows: <image_2>."
-    # Strategy: Replace " <image_2>." with "." or just remove tag and let dot remain?
-    # User said: "make sure you check whether . is needed"
-    # If "shows: <image_2>.", removing tag gives "shows: ." -> "shows:."
-    # If we replace " <image_2>." with ".", we get "shows:." which is okay-ish but "shows:" usually expects something.
-    # However, since the image follows in the <image_start> block immediately, "shows:" is technically pointing to the image.
-    # So "shows:." is awkward. 
-    # Maybe "shows: <image_2>." -> "shows:" (remove dot if it follows image immediately?)
-    # But usually a sentence ends with dot.
-    # Let's try to remove " <image_2>" and keep the dot if it exists, but ensure no double spacing.
-    # actually, "shows: <image_2>." -> "shows: ." -> "shows:."
-    # If we blindly strip, we might get "shows:."
-    # Let's replace " <image_2>." with "." -> "shows:."
-    # Or " <image_2>" with "" -> "shows:."
-    # Let's just remove the tag and ensure clean spacing.
-    # Also handle ':.', ' ..', ' .'
-    clean_sideview_desc = item['sideview_desc'].replace(' <image_2>', '').replace('<image_2>', '').replace(' ..', '.').replace(' .', '.').replace(':.', ':').replace('  ', ' ').strip()
     answer = item['answer']
     
-    part1 = f"<think>{clean_sideview_desc}</think><image_start>"
-    part2 = f"<image_end><answer>{answer}</answer>"
-    
-    output_text_list = [part1, part2]
+    # Check for mm-thought (new dataset)
+    if 'mm-thought' in item and item['mm-thought']:
+        mm_thought = item['mm-thought']
+        import re
+        # Find the image token in the thought
+        # Expected format: "... <image_2> ..."
+        # We need to split around it. 
+        # The thought might look like: "As I move ... At M1 <image_2>, I observe ..."
+        # splitting by regex on <image_\d+>
+        
+        # Note: image token might be <image_1>, <image_2> etc. usually <image_2> based on context
+        split = re.split(r'(<image_\d+>)', mm_thought)
+        
+        if len(split) >= 3:
+            # split[0] is pre-image, split[1] is tag, split[2] is post-image
+            pre_image = split[0].strip()
+            # split[1] is the tag itself, e.g. <image_2>
+            post_image = "".join(split[2:]).strip() 
+             # remove leading punctuation if any from post_image like ", " or "."
+            # User example: "part2=f"<image_end>, I observe..." 
+            # Note: The user wants part2 to start with <image_end>. 
+            # The user example shows: part1 = ... <image_start>"  part2="<image_end>, I observe..."
+            # Wait, the user example logic: 
+            # part1 = "<think>... At M1</think><image_start>"
+            # part2 = "<image_end>, I observe ... <answer>{answer}</answer>"
+            
+            # The user's example "At M1 <image_2>, I observe..."
+            # pre_image = "As I move ... At M1"
+            # post_image = ", I observe ..."
+            
+            part1 = f"<think>{pre_image}</think><image_start>"
+            part2 = f"<image_end>{post_image}<answer>{answer}</answer>"
+            output_text_list = [part1, part2]
+        else:
+            # Fallback if no image tag found in mm-thought (shouldn't happen for this dataset but good safety)
+            # Just put everything in think? or Treat entire thought as pre-image?
+            # If no image tag, maybe it's just text? But we need image_start/end for the VLM training usually.
+            # Let's assume there is at least one image. If not, fallback to old logic?
+            # Or just use the whole thing as think and empty post image?
+            part1 = f"<think>{mm_thought}</think><image_start>"
+            part2 = f"<image_end><answer>{answer}</answer>"
+            output_text_list = [part1, part2]
+            
+    else:
+        # OLD LOGIC
+        # Remove <image_2> from sideview_desc.
+        clean_sideview_desc = item['sideview_desc'].replace(' <image_2>', '').replace('<image_2>', '').replace(' ..', '.').replace(' .', '.').replace(':.', ':').replace('  ', ' ').strip()
+        part1 = f"<think>{clean_sideview_desc}</think><image_start>"
+        part2 = f"<image_end><answer>{answer}</answer>"
+        output_text_list = [part1, part2]
     
     return {
         "image_list": image_list,
@@ -93,8 +121,14 @@ def transform_item(item):
     }
 
 def main():
-    print("Loading source dataset...")
-    ds = load_dataset("linjieli222/ai2thor-path-tracing-qa-train-2point-balanced8-16k", split="train")
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_name", type=str, default="linjieli222/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k", help="HuggingFace dataset path")
+    args = parser.parse_args()
+
+    print(f"Loading source dataset: {args.dataset_name}...")
+    # ds = load_dataset("linjieli222/ai2thor-path-tracing-qa-train-2point-balanced8-16k", split="train")
+    ds = load_dataset(args.dataset_name, split="train")
     
     print("Transforming dataset...")
     # Map first
@@ -106,7 +140,8 @@ def main():
     )
     
     # Define output structure
-    dataset_name = "path-tracing-2point-balanced8-16k" # or thinkmorph_train
+    # Derive text name from the last part of the HF path
+    dataset_name = args.dataset_name.rstrip('/').split('/')[-1]
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)

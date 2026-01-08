@@ -47,3 +47,15 @@ To run the full transformation (this takes longer):
 ```bash
 python data_processing/transform_data.py
 ```
+
+You can optionally specify a Hugging Face dataset path using the `--dataset_name` argument. The script defaults to the MMCOT dataset:
+
+```bash
+# Process the MMCOT dataset (default)
+python data_processing/transform_data.py --dataset_name linjieli222/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k
+
+# Process the standard dataset
+python data_processing/transform_data.py --dataset_name linjieli222/ai2thor-path-tracing-qa-train-2point-balanced8-16k
+```
+
+The output directory will be named based on the provided dataset name (e.g., `ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k`).
