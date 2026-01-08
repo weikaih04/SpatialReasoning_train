@@ -61,7 +61,8 @@ def transform_item(item):
     # 1. <think>{sideview_desc}</think><image_start>
     # 2. <image_end><answer>{answer}</answer>
     
-    answer = item['answer']
+    answer = item.get('answer', '')
+    answer_block = f"<answer>{answer}</answer>" if answer else ""
     
     # Check for mm-thought (new dataset)
     if 'mm-thought' in item and item['mm-thought']:
@@ -94,7 +95,7 @@ def transform_item(item):
             # post_image = ", I observe ..."
             
             part1 = f"<think>{pre_image}</think><image_start>"
-            part2 = f"<image_end>{post_image}<answer>{answer}</answer>"
+            part2 = f"<image_end>{post_image}{answer_block}"
             output_text_list = [part1, part2]
         else:
             # Fallback if no image tag found in mm-thought (shouldn't happen for this dataset but good safety)
@@ -103,7 +104,7 @@ def transform_item(item):
             # Let's assume there is at least one image. If not, fallback to old logic?
             # Or just use the whole thing as think and empty post image?
             part1 = f"<think>{mm_thought}</think><image_start>"
-            part2 = f"<image_end><answer>{answer}</answer>"
+            part2 = f"<image_end>{answer_block}"
             output_text_list = [part1, part2]
             
     else:
@@ -111,7 +112,8 @@ def transform_item(item):
         # Remove <image_2> from sideview_desc.
         clean_sideview_desc = item['sideview_desc'].replace(' <image_2>', '').replace('<image_2>', '').replace(' ..', '.').replace(' .', '.').replace(':.', ':').replace('  ', ' ').strip()
         part1 = f"<think>{clean_sideview_desc}</think><image_start>"
-        part2 = f"<image_end><answer>{answer}</answer>"
+        part2 = f"<image_end>{answer_block}"
+        
         output_text_list = [part1, part2]
     
     return {
