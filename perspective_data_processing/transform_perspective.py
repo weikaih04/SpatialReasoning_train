@@ -7,6 +7,11 @@ import argparse
 
 import re
 
+VLM_THINK_SYSTEM_PROMPT = '''
+Let's think step by step to answer the question. For text-based thinking, enclose the process within <think> </think>, e.g. <think> thinking process here </think>. For visual thinking, enclose the content within <image_start> </image_end>, e.g. <image_start> thinking image here </image_end>. Finally conclude with the final answer wrapped in <answer></answer> tags, i.e.<answer> answer here </answer>.
+'''
+
+
 def get_reasoning_template(question_type, question_text):
     # Extract direction
     # Improved logic: Check "turn... direction" AND "direction turn"
@@ -91,7 +96,7 @@ def transform_item(item):
             choices_str += f"\n({label}) {choice}"
         clean_question += choices_str
     
-    instruction_list = [clean_question]
+    instruction_list = [VLM_THINK_SYSTEM_PROMPT + clean_question]
     
     # 3. Output Text (Reasoning)
     # Generate template

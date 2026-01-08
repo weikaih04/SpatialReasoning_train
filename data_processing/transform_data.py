@@ -1,6 +1,10 @@
 import os
 from datasets import load_dataset, Dataset
 
+VLM_THINK_SYSTEM_PROMPT = '''
+Let's think step by step to answer the question. For text-based thinking, enclose the process within <think> </think>, e.g. <think> thinking process here </think>. For visual thinking, enclose the content within <image_start> </image_end>, e.g. <image_start> thinking image here </image_end>. Finally conclude with the final answer wrapped in <answer></answer> tags, i.e.<answer> answer here </answer>.
+'''
+
 def transform_item(item):
     # Prepare image_list: topdown_image then sideview_images
     topdown = item['topdown_image']
@@ -50,7 +54,7 @@ def transform_item(item):
             choices_str += f"\n({label}) {choice}"
         clean_question += choices_str
 
-    instruction_list = [clean_question]
+    instruction_list = [VLM_THINK_SYSTEM_PROMPT + clean_question]
     
     # Prepare output_text_list
     # Format: 
