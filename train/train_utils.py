@@ -30,6 +30,10 @@ def get_latest_ckpt(checkpoint_dir):
     step_dirs = [d for d in os.listdir(checkpoint_dir) if os.path.isdir(os.path.join(checkpoint_dir, d))]
     if len(step_dirs) == 0:
         return None
+    # Filter to only numeric directory names (checkpoint steps), ignore 'output' etc.
+    step_dirs = [d for d in step_dirs if d.isdigit()]
+    if len(step_dirs) == 0:
+        return None
     step_dirs = sorted(step_dirs, key=lambda x: int(x))
     latest_step_dir = os.path.join(checkpoint_dir, step_dirs[-1])
     return latest_step_dir

@@ -51,11 +51,47 @@ DATASET_INFO = {
             'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/custom_datasets/perspective/bagel_example/editing/perspective-balanced-20k/parquet_info.json',
         },
         # Multi-view counting dataset from HuggingFace (weikaih/multi_view_counting_training_v5)
+        # Uses unified format with num_input_images=4 for multi-input support
         'multi_view_counting': {
-            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/custom_datasets/multi_view_counting/bagel_example/editing/multi_view_counting_v5',
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/multi_view_counting_training_v5',
             'num_files': 5,
-            'num_total_samples': 19957,
-            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/custom_datasets/multi_view_counting/bagel_example/editing/multi_view_counting_v5/parquet_info.json',
+            'num_total_samples': 17079,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/parquet_info/multi_view_counting_training_v5.json',
+        },
+        # AI2Thor Path Tracing MMCOT dataset (QA with visual CoT)
+        'path_tracing_mmcot': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k',
+            'num_files': 5,
+            'num_total_samples': 16610,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/parquet_info/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k.json',
+        },
+        # AI2Thor Path Tracing Sideview dataset (visual CoT description only)
+        'path_tracing_sideview': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/ai2thor-path-tracing-train-sideview-only',
+            'num_files': 5,
+            'num_total_samples': 25290,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/parquet_info/ai2thor-path-tracing-train-sideview-only.json',
+        },
+        # Path Tracing with system prompt (non-mmcot version)
+        'path_tracing_with_sysprompt': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/path_tracing_with_sysprompt',
+            'num_files': 5,
+            'num_total_samples': 16606,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/path_tracing_with_sysprompt/parquet_info.json',
+        },
+        # Perspective Taking with system prompt
+        'perspective_with_sysprompt': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_with_sysprompt',
+            'num_files': 5,
+            'num_total_samples': 20531,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_with_sysprompt/parquet_info.json',
+        },
+        # Perspective Taking - No Thought Baseline (empty <think></think> tags)
+        'perspective_no_thought': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_no_thought',
+            'num_files': 5,
+            'num_total_samples': 20531,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_no_thought/parquet_info.json',
         },
         # BAGEL example data (for reference, not used in training)
         'seedxedit_multi': {

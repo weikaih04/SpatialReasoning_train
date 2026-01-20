@@ -62,7 +62,15 @@ def transform_item(item):
     # 2. <image_end><answer>{answer}</answer>
     
     answer = item.get('answer', '')
-    answer_block = f"<answer>{answer}</answer>" if answer else ""
+    if answer:
+        answer_block = f"<answer>{answer}</answer>"
+    else:
+        # Sideview data has no answer, add confirmation text as training signal
+        sideview_desc = item.get('sideview_desc', '')
+        if sideview_desc:
+            answer_block = "This is the generated view from that perspective."
+        else:
+            answer_block = ""
     
     # Check for mm-thought (new dataset)
     if 'mm-thought' in item and item['mm-thought']:
@@ -135,10 +143,10 @@ def main():
     print("Transforming dataset...")
     # Map first
     new_ds = ds.map(
-        transform_item, 
-        remove_columns=ds.column_names, 
+        transform_item,
+        remove_columns=ds.column_names,
         num_proc=4,
-        features=None 
+        features=None
     )
     
     # Define output structure

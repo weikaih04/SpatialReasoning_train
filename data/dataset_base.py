@@ -105,6 +105,13 @@ class PackedDataset(torch.utils.data.IterableDataset):
             if 'vit_image_transform_args' in dataset_args.keys():
                 vit_transform = ImageTransform(**dataset_args.pop('vit_image_transform_args'))
                 dataset_args['vit_transform'] = vit_transform
+            # Output image transform (for controlling generated image size)
+            # Backward compatible: if not specified, use same transform as input
+            if 'output_image_transform_args' in dataset_args.keys():
+                output_transform = ImageTransform(**dataset_args.pop('output_image_transform_args'))
+                dataset_args['output_transform'] = output_transform
+            elif 'transform' in dataset_args:
+                dataset_args['output_transform'] = dataset_args['transform']
 
             assert 'dataset_names' in dataset_args.keys()
             dataset_names = dataset_args.pop('dataset_names')
