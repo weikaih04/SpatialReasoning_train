@@ -1,12 +1,14 @@
 #!/bin/bash
 
-# Training script for Perspective Taking (PET)
-# Checkpoints saved to: ckpt/pet/<run_name>/
+# Training script for Perspective Taking - Latent 64x64 (BASELINE)
+# Output image: 1024x1024 -> 64x64 latent grid (4096 tokens)
+# Uses new perspective_with_sysprompt dataset
+# Checkpoints saved to: ckpt/pet_latent64/<run_name>/
 
 resume_from=${resume_from:-"models/BAGEL-7B-MoT"}
 run_name=${run_name:-"run_8gpu"}
-output_path=${output_path:-"./ckpt/pet/${run_name}/output"}
-ckpt_path=${ckpt_path:-"./ckpt/pet/${run_name}"}
+output_path=${output_path:-"./ckpt/pet_latent64/${run_name}/output"}
+ckpt_path=${ckpt_path:-"./ckpt/pet_latent64/${run_name}"}
 
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
@@ -15,7 +17,7 @@ torchrun \
   --node_rank=0 \
   --nproc_per_node=8 \
   train/pretrain_unified_navit.py \
-  --dataset_config_file ./data/configs/perspective_8gpu.yaml \
+  --dataset_config_file ./data/configs/perspective_latent64_8gpu.yaml \
   --model_path $resume_from \
   --layer_module Qwen2MoTDecoderLayer \
   --finetune_from_hf True \
@@ -33,5 +35,5 @@ torchrun \
   --expected_num_tokens 24576 \
   --mse_weight 1 \
   --ce_weight 1 \
-  --total_steps 3000
-
+  --save_every 1000 \
+  --total_steps 6000

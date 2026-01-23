@@ -1,0 +1,40 @@
+version: v2
+description: Multi-View Counting - Latent 32x32 (512x512 output, 256 tokens)
+budget: ai2/oe-mm
+tasks:
+- name: mvc_latent32
+  replicas: 1
+  image:
+    docker: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+  envVars:
+    - name: WEIKAI_UW_WANDB_KEY
+      secret: WEIKAI_UW_WANDB_KEY
+  command: ['bash', '-c']
+  arguments:
+  - |
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=America/Los_Angeles
+
+    apt-get update && \
+    apt-get install -y libstdc++6 libgl1-mesa-glx libglib2.0-0 g++ git && \
+    source /weka/oe-training-default/jieyuz2/improve_segments/miniconda3/bin/activate && \
+    conda activate thinkmorph && \
+    cd /weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training && \
+    export WANDB_API_KEY=$WEIKAI_UW_WANDB_KEY && \
+    bash scripts/train_mvc_latent32.sh
+  result:
+    path: /exp_outputs
+  datasets:
+    - mountPath: /weka/oe-training-default
+      source:
+        weka: oe-training-default
+  resources:
+    gpuCount: 8
+    sharedMemory: 200GiB
+  context:
+    priority: high
+    preemptible: true
+  constraints:
+    cluster: [ai2/jupiter, ai2/ceres, ai2/saturn]
+  hostNetworking: true
+  leaderSelection: true

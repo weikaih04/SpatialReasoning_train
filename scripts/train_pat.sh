@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# Training script for Path Tracing (PAT)
+# Checkpoints saved to: ckpt/pat/<run_name>/
+
 resume_from=${resume_from:-"models/BAGEL-7B-MoT"}
-output_path=${output_path:-"./output_pat"}
-ckpt_path=${ckpt_path:-"./ckpt_pat"}
+run_name=${run_name:-"run_8gpu"}
+output_path=${output_path:-"./ckpt/pat/${run_name}/output"}
+ckpt_path=${ckpt_path:-"./ckpt/pat/${run_name}"}
 
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 

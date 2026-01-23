@@ -1,0 +1,108 @@
+version: v2
+description: Molmo 2 Data Judger Eval - PET Latent 64x64 BASELINE (1024x1024 output)
+budget: ai2/oe-mm
+tasks:
+- name: eval-pet-latent64
+  replicas: 1
+  image:
+    docker: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+  envVars:
+    - name: WEIKAI_UW_WANDB_KEY
+      secret: WEIKAI_UW_WANDB_KEY
+  command: ['bash', '-c']
+  arguments:
+  - |
+    # ============================================================================
+    # Configuration - MODIFY THIS SECTION FOR EACH NEW CHECKPOINT
+    # ============================================================================
+    # 👈 CHANGE THIS to your checkpoint path
+    export MODEL_PATH="ckpt/pet_latent64/run_8gpu/0006000"
+
+    # Image resolution - MUST match training output size
+    export THINKMORPH_IMAGE_RESOLUTION=1024  # 1024x1024 -> 64x64 latent (BASELINE)
+
+    # Run name for organizing outputs
+    export RUN_NAME=$(echo ${MODEL_PATH} | cut -d'/' -f3)
+    export STEP_NAME=$(basename ${MODEL_PATH})
+
+    # Multi-GPU Configuration
+    export NPROC=2
+    # ============================================================================
+
+    export DATASET_NAME=AI2ThorPerspective_NoArrow
+    export MODEL_NAME="thinkmorph_pet"
+    export FULL_MODEL_PATH="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/${MODEL_PATH}"
+
+    export THINKMORPH_MODEL_PATH="${FULL_MODEL_PATH}"
+    export THINKMORPH_SAVE_DIR="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/results/pet_latent64/${RUN_NAME}/${STEP_NAME}"
+
+    echo "=========================================="
+    echo "Evaluation Configuration"
+    echo "=========================================="
+    echo "Model Path: ${MODEL_PATH}"
+    echo "Full Path: ${FULL_MODEL_PATH}"
+    echo "Dataset: ${DATASET_NAME}"
+    echo "Model Name: ${MODEL_NAME}"
+    echo "Image Resolution: ${THINKMORPH_IMAGE_RESOLUTION}"
+    echo "Save Dir: ${THINKMORPH_SAVE_DIR}"
+    echo "=========================================="
+    echo ""
+
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=America/Los_Angeles
+
+    apt-get update && \
+    apt-get install -y libstdc++6 libgl1-mesa-glx libglib2.0-0 g++ git
+
+    source /weka/oe-training-default/jieyuz2/improve_segments/miniconda3/etc/profile.d/conda.sh
+    conda activate thinkmorph_eval
+
+    cd /weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training
+
+    echo "Preparing checkpoint for evaluation..."
+    bash scripts/prepare_checkpoint_for_eval.sh ${MODEL_PATH}
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Checkpoint preparation failed!"
+        exit 1
+    fi
+
+    cd VLMEvalKit_Thinkmorph
+
+    echo "Starting Evaluation with Multi-GPU..."
+    NUM_GPUS=$(nvidia-smi --list-gpus | wc -l)
+    GPU_PER_PROC=$((NUM_GPUS / NPROC))
+    echo "Total GPUs: ${NUM_GPUS}, Parallel processes: ${NPROC}"
+
+    torchrun --nproc_per_node=${NPROC} run.py \
+      --data ${DATASET_NAME} \
+      --model ${MODEL_NAME} \
+      --mode all \
+      --work-dir outputs_eval \
+      --verbose
+
+    EVAL_EXIT_CODE=$?
+
+    if [ $EVAL_EXIT_CODE -eq 0 ]; then
+        echo "✅ Evaluation completed successfully!"
+    else
+        echo "❌ Evaluation failed with exit code: ${EVAL_EXIT_CODE}"
+        exit ${EVAL_EXIT_CODE}
+    fi
+
+  result:
+    path: /exp_outputs
+  datasets:
+    - mountPath: /weka/oe-training-default
+      source:
+        weka: oe-training-default
+  resources:
+    gpuCount: 8
+    sharedMemory: 200GiB
+  context:
+    priority: high
+    preemptible: true
+  constraints:
+    cluster: [ai2/jupiter, ai2/ceres, ai2/saturn]
+  hostNetworking: true
+  leaderSelection: true

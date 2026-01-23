@@ -1,7 +1,15 @@
 # Copyright 2025 Bytedance Ltd. and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 
-# replace the variables with your own
+# ThinkMorph Full Training Script
+# Checkpoints saved to: ckpt/thinkmorph/<run_name>/
+
+# Set default paths (can be overridden by environment variables)
+resume_from=${resume_from:-"models/BAGEL-7B-MoT"}
+run_name=${run_name:-"run_8gpu"}
+output_path=${output_path:-"./ckpt/thinkmorph/${run_name}/output"}
+ckpt_path=${ckpt_path:-"./ckpt/thinkmorph/${run_name}"}
+
 torchrun \
   --nnodes=$num_nodes \
   --node_rank=$node_rank \

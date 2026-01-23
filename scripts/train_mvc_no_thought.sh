@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# Training script for Perspective Taking (PET)
-# Checkpoints saved to: ckpt/pet/<run_name>/
+# Training script for Multi-View Counting - No Thought Baseline
+# This is a baseline that only trains on text output without intermediate visual thought
+# Checkpoints saved to: ckpt/mvc_no_thought/<run_name>/
 
 resume_from=${resume_from:-"models/BAGEL-7B-MoT"}
 run_name=${run_name:-"run_8gpu"}
-output_path=${output_path:-"./ckpt/pet/${run_name}/output"}
-ckpt_path=${ckpt_path:-"./ckpt/pet/${run_name}"}
+output_path=${output_path:-"./ckpt/mvc_no_thought/${run_name}/output"}
+ckpt_path=${ckpt_path:-"./ckpt/mvc_no_thought/${run_name}"}
 
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
@@ -15,7 +16,7 @@ torchrun \
   --node_rank=0 \
   --nproc_per_node=8 \
   train/pretrain_unified_navit.py \
-  --dataset_config_file ./data/configs/perspective_8gpu.yaml \
+  --dataset_config_file ./data/configs/multi_view_counting_no_thought_8gpu.yaml \
   --model_path $resume_from \
   --layer_module Qwen2MoTDecoderLayer \
   --finetune_from_hf True \
@@ -31,7 +32,8 @@ torchrun \
   --max_num_tokens 32768 \
   --max_num_tokens_per_sample 24576 \
   --expected_num_tokens 24576 \
-  --mse_weight 1 \
+  --visual_gen False \
+  --mse_weight 0 \
   --ce_weight 1 \
-  --total_steps 3000
-
+  --save_every 1000 \
+  --total_steps 6000

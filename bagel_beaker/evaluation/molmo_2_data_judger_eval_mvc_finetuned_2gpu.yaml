@@ -1,0 +1,138 @@
+version: v2
+description: MVC Eval - Finetuned Model (400 samples, 2 GPU)
+budget: ai2/oe-mm
+tasks:
+- name: eval-mvc-finetuned
+  replicas: 1
+  image:
+    docker: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+  envVars:
+    - name: WEIKAI_UW_WANDB_KEY
+      secret: WEIKAI_UW_WANDB_KEY
+  command: ['bash', '-c']
+  arguments:
+  - |
+    # ============================================================================
+    # Configuration - Finetuned MVC Model (step 9880)
+    # ============================================================================
+    export MODEL_PATH="ckpt/multi_view_counting/run_8gpu/0009880_full"
+
+    # Run name for organizing outputs (derived from MODEL_PATH)
+    export RUN_NAME=$(echo ${MODEL_PATH} | cut -d'/' -f3)  # e.g., run_8gpu
+    export STEP_NAME=$(basename ${MODEL_PATH})  # e.g., 0009880_full
+
+    # Multi-GPU Configuration
+    # For 4 GPUs: Use NPROC=1 (single process uses all 4 GPUs)
+    export NPROC=1
+    # ============================================================================
+
+    export DATASET_NAME=AI2ThorMultiViewCounting
+    export MODEL_NAME="thinkmorph_mvc"
+    export FULL_MODEL_PATH="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/${MODEL_PATH}"
+
+    # Set environment variables for dynamic model loading (used by config.py)
+    export THINKMORPH_MODEL_PATH="${FULL_MODEL_PATH}"
+    export THINKMORPH_SAVE_DIR="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/results/mvc/${RUN_NAME}/${STEP_NAME}"
+
+    echo "=========================================="
+    echo "Evaluation Configuration"
+    echo "=========================================="
+    echo "Model Path: ${MODEL_PATH}"
+    echo "Full Path: ${FULL_MODEL_PATH}"
+    echo "Dataset: ${DATASET_NAME}"
+    echo "Model Name: ${MODEL_NAME}"
+    echo "Run Name: ${RUN_NAME}"
+    echo "Step: ${STEP_NAME}"
+    echo "Save Dir: ${THINKMORPH_SAVE_DIR}"
+    echo "=========================================="
+    echo ""
+
+    # Setup environment
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=America/Los_Angeles
+
+    echo "Installing system dependencies..."
+    apt-get update && \
+    apt-get install -y libstdc++6 libgl1-mesa-glx libglib2.0-0 g++ git
+
+    echo "Activating conda environment..."
+    source /weka/oe-training-default/jieyuz2/improve_segments/miniconda3/etc/profile.d/conda.sh
+    conda activate thinkmorph_eval
+
+    cd /weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training
+
+    # Prepare checkpoint (copy config files if missing)
+    echo ""
+    echo "Preparing checkpoint for evaluation..."
+    bash scripts/prepare_checkpoint_for_eval.sh ${MODEL_PATH}
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Checkpoint preparation failed!"
+        exit 1
+    fi
+
+    # Navigate to evaluation directory
+    cd VLMEvalKit_Thinkmorph
+
+    # Run evaluation with torchrun for multi-GPU acceleration
+    echo ""
+    echo "=========================================="
+    echo "Starting Evaluation with Multi-GPU"
+    echo "=========================================="
+    echo "Running full evaluation on ${DATASET_NAME}..."
+    echo ""
+
+    # Get number of available GPUs
+    NUM_GPUS=$(nvidia-smi --list-gpus | wc -l)
+    GPU_PER_PROC=$((NUM_GPUS / NPROC))
+
+    echo "Configuration:"
+    echo "  Total GPUs: ${NUM_GPUS}"
+    echo "  Parallel processes: ${NPROC}"
+    echo "  GPUs per process: ${GPU_PER_PROC}"
+    echo "  Expected speedup: ~${NPROC}x"
+    echo ""
+
+    # Use torchrun for multi-GPU parallel inference
+    torchrun --nproc_per_node=${NPROC} run.py \
+      --data ${DATASET_NAME} \
+      --model ${MODEL_NAME} \
+      --mode all \
+      --work-dir outputs_eval \
+      --verbose
+
+    EVAL_EXIT_CODE=$?
+
+    echo ""
+    echo "=========================================="
+    if [ $EVAL_EXIT_CODE -eq 0 ]; then
+        echo "✅ Evaluation completed successfully!"
+        echo "=========================================="
+        echo ""
+        echo "Results location:"
+        echo "  outputs_eval/${MODEL_NAME}/"
+        echo ""
+        echo "Visualization outputs:"
+        echo "  ${THINKMORPH_SAVE_DIR}/"
+    else
+        echo "❌ Evaluation failed with exit code: ${EVAL_EXIT_CODE}"
+        echo "=========================================="
+        exit ${EVAL_EXIT_CODE}
+    fi
+
+  result:
+    path: /exp_outputs
+  datasets:
+    - mountPath: /weka/oe-training-default
+      source:
+        weka: oe-training-default
+  resources:
+    gpuCount: 2
+    sharedMemory: 200GiB
+  context:
+    priority: high
+    preemptible: true
+  constraints:
+    cluster: [ai2/jupiter, ai2/ceres]
+  hostNetworking: true
+  leaderSelection: true

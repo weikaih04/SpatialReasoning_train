@@ -1,0 +1,128 @@
+version: v2
+description: Molmo 2 Data Judger Eval - BAGEL Base Model (PAT + PET)
+budget: ai2/oe-mm
+tasks:
+- name: eval-bagel-base
+  replicas: 1
+  image:
+    docker: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+  envVars:
+    - name: WEIKAI_UW_WANDB_KEY
+      secret: WEIKAI_UW_WANDB_KEY
+  command: ['bash', '-c']
+  arguments:
+  - |
+    # ============================================================================
+    # BAGEL Base Model Evaluation
+    # Evaluates on both PAT (AI2ThorPathTracing) and PET (AI2ThorPerspective_NoArrow)
+    # ============================================================================
+
+    export MODEL_PATH="models/BAGEL-7B-MoT"
+    export MODEL_NAME="bagel_mot"
+    export FULL_MODEL_PATH="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/${MODEL_PATH}"
+
+    # Set environment variables for dynamic model loading
+    export THINKMORPH_MODEL_PATH="${FULL_MODEL_PATH}"
+    export THINKMORPH_SAVE_DIR="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/results/bagel_base"
+
+    echo "=========================================="
+    echo "BAGEL Base Model Evaluation"
+    echo "=========================================="
+    echo "Model Path: ${FULL_MODEL_PATH}"
+    echo "Model Name: ${MODEL_NAME}"
+    echo "Save Dir: ${THINKMORPH_SAVE_DIR}"
+    echo "=========================================="
+    echo ""
+
+    # Setup environment
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=America/Los_Angeles
+
+    echo "Installing system dependencies..."
+    apt-get update && \
+    apt-get install -y libstdc++6 libgl1-mesa-glx libglib2.0-0 g++ git
+
+    echo "Activating conda environment..."
+    source /weka/oe-training-default/jieyuz2/improve_segments/miniconda3/etc/profile.d/conda.sh
+    conda activate thinkmorph_eval
+
+    cd /weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/VLMEvalKit_Thinkmorph
+
+    # ========================================
+    # Evaluate on PAT (Path Tracing)
+    # ========================================
+    echo ""
+    echo "=========================================="
+    echo "Evaluating on AI2ThorPathTracing (409 samples)"
+    echo "=========================================="
+
+    export THINKMORPH_SAVE_DIR="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/results/bagel_base/pat"
+
+    python run.py \
+      --data AI2ThorPathTracing \
+      --model ${MODEL_NAME} \
+      --mode all \
+      --work-dir outputs_bagel_base \
+      --verbose
+
+    PAT_EXIT_CODE=$?
+
+    # ========================================
+    # Evaluate on PET (Perspective Taking)
+    # ========================================
+    echo ""
+    echo "=========================================="
+    echo "Evaluating on AI2ThorPerspective_NoArrow (800 samples)"
+    echo "=========================================="
+
+    export THINKMORPH_SAVE_DIR="/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/results/bagel_base/pet"
+
+    python run.py \
+      --data AI2ThorPerspective_NoArrow \
+      --model ${MODEL_NAME} \
+      --mode all \
+      --work-dir outputs_bagel_base \
+      --verbose
+
+    PET_EXIT_CODE=$?
+
+    # ========================================
+    # Summary
+    # ========================================
+    echo ""
+    echo "=========================================="
+    echo "Evaluation Summary"
+    echo "=========================================="
+
+    echo "PAT Results:"
+    cat outputs_bagel_base/${MODEL_NAME}/*AI2ThorPathTracing*_acc.csv 2>/dev/null || echo "  (not found)"
+
+    echo ""
+    echo "PET Results:"
+    cat outputs_bagel_base/${MODEL_NAME}/*AI2ThorPerspective*_acc.csv 2>/dev/null || echo "  (not found)"
+
+    if [ $PAT_EXIT_CODE -eq 0 ] && [ $PET_EXIT_CODE -eq 0 ]; then
+        echo ""
+        echo "✅ All evaluations completed successfully!"
+    else
+        echo ""
+        echo "❌ Some evaluations failed (PAT: ${PAT_EXIT_CODE}, PET: ${PET_EXIT_CODE})"
+        exit 1
+    fi
+
+  result:
+    path: /exp_outputs
+  datasets:
+    - mountPath: /weka/oe-training-default
+      source:
+        weka: oe-training-default
+  resources:
+    gpuCount: 4
+    sharedMemory: 200GiB
+  context:
+    priority: high
+    preemptible: true
+  constraints:
+    cluster: [ai2/jupiter, ai2/ceres]
+  hostNetworking: true
+  leaderSelection: true

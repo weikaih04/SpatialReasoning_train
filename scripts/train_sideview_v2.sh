@@ -1,12 +1,15 @@
 #!/bin/bash
 
-# Training script for Perspective Taking (PET)
-# Checkpoints saved to: ckpt/pet/<run_name>/
+# Training script for Sideview-only visual CoT V2 (with training signal fix)
+# Checkpoints saved to: ckpt/sideview_v2/<run_name>/
+# Key changes from v1:
+#   - Data regenerated with answer text for CE loss
+#   - Checkpoint saved every 1000 steps (was 380)
 
 resume_from=${resume_from:-"models/BAGEL-7B-MoT"}
 run_name=${run_name:-"run_8gpu"}
-output_path=${output_path:-"./ckpt/pet/${run_name}/output"}
-ckpt_path=${ckpt_path:-"./ckpt/pet/${run_name}"}
+output_path=${output_path:-"./ckpt/sideview_v2/${run_name}/output"}
+ckpt_path=${ckpt_path:-"./ckpt/sideview_v2/${run_name}"}
 
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
@@ -15,7 +18,7 @@ torchrun \
   --node_rank=0 \
   --nproc_per_node=8 \
   train/pretrain_unified_navit.py \
-  --dataset_config_file ./data/configs/perspective_8gpu.yaml \
+  --dataset_config_file ./data/configs/path_tracing_sideview_v2_8gpu.yaml \
   --model_path $resume_from \
   --layer_module Qwen2MoTDecoderLayer \
   --finetune_from_hf True \
@@ -33,5 +36,5 @@ torchrun \
   --expected_num_tokens 24576 \
   --mse_weight 1 \
   --ce_weight 1 \
-  --total_steps 3000
-
+  --save_every 1000 \
+  --total_steps 6000

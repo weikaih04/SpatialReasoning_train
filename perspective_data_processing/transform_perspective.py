@@ -163,56 +163,51 @@ def main():
         
     print("Transforming dataset...")
     new_ds = full_ds.map(
-        transform_item, 
-        remove_columns=full_ds.column_names, 
-        num_proc=4 if not args.debug else 1,
-        features=None 
+        transform_item,
+        remove_columns=full_ds.column_names,
+        num_proc=64 if not args.debug else 1,
+        features=None
     )
     
-    # Define output structure
-    # Define output structure
-    dataset_name = "perspective_qa"
-    
+    # Define output structure - save to organized data/training directory
+    dataset_name = "perspective_with_sysprompt"
+
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
-    base_dir = os.path.join(project_root, "bagel_example", "editing")
-    
-    data_dir = os.path.join(base_dir, dataset_name)
-    info_dir = os.path.join(base_dir, "parquet_info")
-    
+    data_dir = os.path.join(project_root, "data", "training", dataset_name)
+
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
-    if not os.path.exists(info_dir):
-        os.makedirs(info_dir)
-        
+
     # Shard and save
     num_shards = 5 if not args.debug else 1
     metadata_info = {}
-    
+    total_samples = 0
+
     print(f"Saving to {num_shards} shards in {data_dir}...")
     for i in range(num_shards):
         shard = new_ds.shard(num_shards=num_shards, index=i)
         filename = f"chunk_{i}.parquet"
         filepath = os.path.join(data_dir, filename)
-        
+
         shard.to_parquet(filepath)
-        
+
         # Read back to get info
         pf = pq.ParquetFile(filepath)
-        # Store relative path or absolute? Previous verified used relative key in JSON but absolute in py usage?
-        # Actually the example json had specific keys. Let's stick to filepath.
         metadata_info[filepath] = {
             "num_row_groups": pf.num_row_groups,
             "num_rows": shard.num_rows
         }
+        total_samples += shard.num_rows
         print(f"Saved {filename}: {shard.num_rows} rows")
 
-    # Save metadata json
-    json_path = os.path.join(info_dir, f"{dataset_name}.json")
+    # Save metadata json inside data directory
+    json_path = os.path.join(data_dir, "parquet_info.json")
     with open(json_path, 'w') as f:
         json.dump(metadata_info, f, indent=4)
-        
+
     print(f"Saved metadata to {json_path}")
+    print(f"Total samples: {total_samples}")
     
     # If debug, print verification
     if args.debug:
