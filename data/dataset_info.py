@@ -58,6 +58,16 @@ DATASET_INFO = {
             'num_total_samples': 17079,
             'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/parquet_info/multi_view_counting_training_v5.json',
         },
+        # Multi-view counting - No Thought Baseline (direct answer without visual thought)
+        'mvc_no_thought': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/multi_view_counting_no_thought',
+            'num_files': 5,
+            'num_total_samples': 17079,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/multi_view_counting_no_thought/parquet_info.json',
+        },
+        # NOTE: For MVC latent ablations (latent4, latent16, latent32), we use the same
+        # 'multi_view_counting' dataset with different output_image_transform_args in the config
+        # to resize output images at training time (same approach as PET ablations)
         # AI2Thor Path Tracing MMCOT dataset (QA with visual CoT)
         'path_tracing_mmcot': {
             'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k',
@@ -92,6 +102,48 @@ DATASET_INFO = {
             'num_files': 5,
             'num_total_samples': 20531,
             'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_no_thought/parquet_info.json',
+        },
+        # Perspective Taking - MM CoT (detailed reasoning with image generation)
+        'perspective_mmcot': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_mmcot',
+            'num_files': 5,
+            'num_total_samples': 20531,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_mmcot/parquet_info.json',
+        },
+        # Perspective Taking - Text CoT (detailed reasoning without image generation)
+        'perspective_textcot': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_textcot',
+            'num_files': 5,
+            'num_total_samples': 20531,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/perspective_textcot/parquet_info.json',
+        },
+        # Habitat Perspective Taking dataset (weikaih/habitat-perspective-qa-train)
+        'habitat_perspective': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/habitat_perspective',
+            'num_files': 5,
+            'num_total_samples': 19998,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/habitat_perspective/parquet_info.json',
+        },
+        # Multi-view counting - MM CoT (detailed reasoning with topdown map generation)
+        'mvc_mmcot': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/mvc_mmcot',
+            'num_files': 5,
+            'num_total_samples': 16808,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/mvc_mmcot/parquet_info.json',
+        },
+        # Multi-view counting - Text CoT (frame-by-frame reasoning, no image generation)
+        'mvc_textcot': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/mvc_textcot',
+            'num_files': 5,
+            'num_total_samples': 16808,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/mvc_textcot/parquet_info.json',
+        },
+        # Real Perspective Taking dataset (MahtabBg/real_perspective_taking, ScanNet/ScanNet++)
+        'real_perspective': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/real_perspective',
+            'num_files': 5,
+            'num_total_samples': 15000,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/real_perspective/parquet_info.json',
         },
         # BAGEL example data (for reference, not used in training)
         'seedxedit_multi': {
