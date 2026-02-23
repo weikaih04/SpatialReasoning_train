@@ -124,6 +124,14 @@ DATASET_INFO = {
             'num_total_samples': 19998,
             'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/habitat_perspective/parquet_info.json',
         },
+        # Habitat Perspective Taking v2 dataset (weikaih/habitat-perspective-qa-train-v2)
+        # 6 categories: distance_closer, distance_further, position_left_left, position_left_right, position_right_left, position_right_right
+        'habitat_perspective_v2': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/habitat_perspective_v2',
+            'num_files': 5,
+            'num_total_samples': 19998,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/habitat_perspective_v2/parquet_info.json',
+        },
         # Multi-view counting - MM CoT (detailed reasoning with topdown map generation)
         'mvc_mmcot': {
             'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/mvc_mmcot',
@@ -137,6 +145,22 @@ DATASET_INFO = {
             'num_files': 5,
             'num_total_samples': 16808,
             'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/mvc_textcot/parquet_info.json',
+        },
+        # MessyTable Multi-View Counting (leo66666/messytable train split)
+        # 2-7 multi-view tabletop images, visual thought (reasoning_image_0) + MCQ answer
+        'messytable': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/messytable',
+            'num_files': 5,
+            'num_total_samples': 1880,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/messytable/parquet_info.json',
+        },
+        # ScanNet Counting (leo66666/scannet_counting train split)
+        # 5-8 multi-view indoor scene images, visual thought (reasoning_image_0) + MCQ answer
+        'scannet_counting': {
+            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/scannet_counting',
+            'num_files': 5,
+            'num_total_samples': 540,
+            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/scannet_counting/parquet_info.json',
         },
         # Real Perspective Taking dataset (MahtabBg/real_perspective_taking, ScanNet/ScanNet++)
         'real_perspective': {
