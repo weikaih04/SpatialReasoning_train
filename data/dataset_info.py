@@ -68,20 +68,6 @@ DATASET_INFO = {
         # NOTE: For MVC latent ablations (latent4, latent16, latent32), we use the same
         # 'multi_view_counting' dataset with different output_image_transform_args in the config
         # to resize output images at training time (same approach as PET ablations)
-        # AI2Thor Path Tracing MMCOT dataset (QA with visual CoT)
-        'path_tracing_mmcot': {
-            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k',
-            'num_files': 5,
-            'num_total_samples': 16610,
-            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/parquet_info/ai2thor-path-tracing-qa-train-2point-balanced8-mmcot-16k.json',
-        },
-        # AI2Thor Path Tracing Sideview dataset (visual CoT description only)
-        'path_tracing_sideview': {
-            'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/ai2thor-path-tracing-train-sideview-only',
-            'num_files': 5,
-            'num_total_samples': 25290,
-            'parquet_info_path': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/bagel_example/editing/parquet_info/ai2thor-path-tracing-train-sideview-only.json',
-        },
         # Path Tracing with system prompt (non-mmcot version)
         'path_tracing_with_sysprompt': {
             'data_dir': '/weka/oe-training-default/jieyuz2/improve_segments/visual_cot/ThinkMorph_training/data/training/path_tracing_with_sysprompt',
